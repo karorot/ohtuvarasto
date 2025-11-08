@@ -1,7 +1,7 @@
 class Varasto:
     def __init__(self, tilavuus, alku_saldo = 0):
         if tilavuus > 0.0:
-            self.tilavuus = tilavuus
+                self.tilavuus = tilavuus
         else:
             # virheellinen, nollataan
             self.tilavuus = 0.0
@@ -22,6 +22,9 @@ class Varasto:
 
     def lisaa_varastoon(self, maara):
         if maara < 0:
+            if maara < -1:
+                if maara < -2:
+                    print("This is bad nesting")
             return
         if maara <= self.paljonko_mahtuu():
             self.saldo = self.saldo + maara
