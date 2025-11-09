@@ -5,4 +5,6 @@
 
 Ohjelmistotuotanto (syksy 2025), Helsingin yliopisto
 
-Tehtävät 2-13
+## Sisältö:
+* Viikko 1: Tehtävät 2-13
+* Viikko 2: Tehtävät 6-8 (viimeinen osittain)
