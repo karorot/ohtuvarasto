@@ -1,13 +1,16 @@
 import unittest
-from app import create_app, manager, WarehouseManager, parse_float
+from app import create_app, get_manager, WarehouseManager, parse_float
 
 
 class TestApp(unittest.TestCase):
     def setUp(self):
         self.app = create_app()
         self.client = self.app.test_client()
-        manager.varastot.clear()
-        manager.next_id = 1
+        mgr = get_manager(self.app)
+        mgr.reset()
+
+    def get_mgr(self):
+        return get_manager(self.app)
 
     def test_index_page_loads(self):
         response = self.client.get("/")
@@ -28,8 +31,17 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Test Warehouse", response.data)
 
+    def test_create_warehouse_invalid_shows_error(self):
+        response = self.client.post("/create", data={
+            "nimi": "",
+            "tilavuus": "100",
+            "alku_saldo": "50"
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Virhe", response.data)
+
     def test_view_warehouse(self):
-        manager.create("Test", 100, 50)
+        self.get_mgr().create("Test", 100, 50)
         response = self.client.get("/warehouse/1")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Test", response.data)
@@ -39,23 +51,23 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_add_products(self):
-        manager.create("Test", 100, 50)
+        self.get_mgr().create("Test", 100, 50)
         response = self.client.post("/warehouse/1/add", data={
             "maara": "20"
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertAlmostEqual(manager.get(1)["varasto"].saldo, 70)
+        self.assertAlmostEqual(self.get_mgr().get(1)["varasto"].saldo, 70)
 
     def test_remove_products(self):
-        manager.create("Test", 100, 50)
+        self.get_mgr().create("Test", 100, 50)
         response = self.client.post("/warehouse/1/remove", data={
             "maara": "20"
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertAlmostEqual(manager.get(1)["varasto"].saldo, 30)
+        self.assertAlmostEqual(self.get_mgr().get(1)["varasto"].saldo, 30)
 
     def test_edit_warehouse_page_loads(self):
-        manager.create("Test", 100, 50)
+        self.get_mgr().create("Test", 100, 50)
         response = self.client.get("/warehouse/1/edit")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Muokkaa", response.data)
@@ -65,19 +77,28 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_edit_warehouse(self):
-        manager.create("Test", 100, 50)
+        self.get_mgr().create("Test", 100, 50)
         response = self.client.post("/warehouse/1/edit", data={
             "nimi": "Updated Name",
             "tilavuus": "200"
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(manager.get(1)["nimi"], "Updated Name")
+        self.assertEqual(self.get_mgr().get(1)["nimi"], "Updated Name")
+
+    def test_edit_warehouse_invalid_shows_error(self):
+        self.get_mgr().create("Test", 100, 50)
+        response = self.client.post("/warehouse/1/edit", data={
+            "nimi": "",
+            "tilavuus": "200"
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Virhe", response.data)
 
     def test_delete_warehouse(self):
-        manager.create("Test", 100, 50)
+        self.get_mgr().create("Test", 100, 50)
         response = self.client.post("/warehouse/1/delete", follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(manager.get(1))
+        self.assertIsNone(self.get_mgr().get(1))
 
 
 class TestWarehouseManager(unittest.TestCase):
@@ -132,6 +153,12 @@ class TestWarehouseManager(unittest.TestCase):
         self.mgr.create("Test2", 200, 100)
         all_warehouses = self.mgr.get_all()
         self.assertEqual(len(all_warehouses), 2)
+
+    def test_reset(self):
+        self.mgr.create("Test", 100, 50)
+        self.mgr.reset()
+        self.assertEqual(len(self.mgr.get_all()), 0)
+        self.assertEqual(self.mgr.next_id, 1)
 
 
 class TestParseFloat(unittest.TestCase):
