@@ -1,5 +1,6 @@
 import unittest
-from app import create_app, get_manager, WarehouseManager, parse_float
+from app import create_app, get_manager, parse_float
+from warehouse_manager import WarehouseManager
 
 
 class TestApp(unittest.TestCase):
