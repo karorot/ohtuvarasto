@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Muokkaa varastoa{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Muokkaa varastoa</h1>
+    
+    <form method="POST" class="bg-white rounded-lg shadow-md p-6">
+        <div class="mb-4">
+            <label for="nimi" class="block text-gray-700 font-medium mb-2">
+                Varaston nimi
+            </label>
+            <input type="text" id="nimi" name="nimi" required
+                   value="{{ data.nimi }}"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div class="mb-4">
+            <label for="tilavuus" class="block text-gray-700 font-medium mb-2">
+                Kapasiteetti
+            </label>
+            <input type="number" id="tilavuus" name="tilavuus" required min="0.1" step="0.1"
+                   value="{{ data.varasto.tilavuus }}"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <p class="text-sm text-gray-500 mt-1">
+                Nykyinen saldo: {{ "%.1f"|format(data.varasto.saldo) }}. 
+                Jos kapasiteetti on pienempi kuin saldo, saldo rajoitetaan kapasiteettiin.
+            </p>
+        </div>
+        
+        <div class="flex gap-3">
+            <button type="submit" 
+                    class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Tallenna muutokset
+            </button>
+            <a href="{{ url_for('warehouse', varasto_id=varasto_id) }}" 
+               class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 text-center">
+                Peruuta
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

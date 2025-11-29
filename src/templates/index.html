@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Varastot - Etusivu{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Varastot</h1>
+
+{% if varastot %}
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for id, data in varastot.items() %}
+    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <h2 class="text-xl font-semibold mb-2">{{ data.nimi }}</h2>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Saldo: {{ "%.1f"|format(data.varasto.saldo) }}</span>
+                <span>Tilaa: {{ "%.1f"|format(data.varasto.paljonko_mahtuu()) }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                {% set fill_percent = (data.varasto.saldo / data.varasto.tilavuus * 100) if data.varasto.tilavuus > 0 else 0 %}
+                <div class="bg-blue-600 h-4 rounded-full transition-all duration-300" 
+                     style="width: {{ fill_percent }}%"></div>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">
+                Kapasiteetti: {{ "%.1f"|format(data.varasto.tilavuus) }}
+            </p>
+        </div>
+        <a href="{{ url_for('warehouse', varasto_id=id) }}" 
+           class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full text-center">
+            Hallinnoi
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-lg shadow-md p-8 text-center">
+    <p class="text-gray-600 mb-4">Ei varastoja vielä. Luo ensimmäinen varasto!</p>
+    <a href="{{ url_for('create') }}" 
+       class="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+        + Luo uusi varasto
+    </a>
+</div>
+{% endif %}
+{% endblock %}
