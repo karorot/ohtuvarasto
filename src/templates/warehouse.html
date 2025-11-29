@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ data.nimi }} - Varasto{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">{{ data.nimi }}</h1>
+        <div class="flex gap-2">
+            <a href="{{ url_for('edit_warehouse', varasto_id=varasto_id) }}" 
+               class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                Muokkaa
+            </a>
+            <form method="POST" action="{{ url_for('delete_warehouse', varasto_id=varasto_id) }}"
+                  onsubmit="return confirm('Haluatko varmasti poistaa tämän varaston?');">
+                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Poista
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Varaston tila</h2>
+        <div class="grid grid-cols-3 gap-4 text-center mb-4">
+            <div class="bg-blue-50 rounded p-4">
+                <p class="text-2xl font-bold text-blue-600">{{ "%.1f"|format(data.varasto.saldo) }}</p>
+                <p class="text-sm text-gray-600">Saldo</p>
+            </div>
+            <div class="bg-green-50 rounded p-4">
+                <p class="text-2xl font-bold text-green-600">{{ "%.1f"|format(data.varasto.paljonko_mahtuu()) }}</p>
+                <p class="text-sm text-gray-600">Tilaa jäljellä</p>
+            </div>
+            <div class="bg-gray-50 rounded p-4">
+                <p class="text-2xl font-bold text-gray-600">{{ "%.1f"|format(data.varasto.tilavuus) }}</p>
+                <p class="text-sm text-gray-600">Kapasiteetti</p>
+            </div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-6">
+            {% set fill_percent = (data.varasto.saldo / data.varasto.tilavuus * 100) if data.varasto.tilavuus > 0 else 0 %}
+            <div class="bg-blue-600 h-6 rounded-full transition-all duration-300 flex items-center justify-center text-white text-sm font-medium" 
+                 style="width: {{ fill_percent }}%">
+                {% if fill_percent >= 15 %}{{ "%.0f"|format(fill_percent) }}%{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="grid md:grid-cols-2 gap-6">
+        <!-- Add Products -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold mb-4 text-green-600">Lisää tuotteita</h2>
+            <form method="POST" action="{{ url_for('add_products', varasto_id=varasto_id) }}">
+                <div class="mb-4">
+                    <label for="add_maara" class="block text-gray-700 font-medium mb-2">
+                        Määrä
+                    </label>
+                    <input type="number" id="add_maara" name="maara" required min="0.1" step="0.1"
+                           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                           placeholder="Lisättävä määrä">
+                </div>
+                <button type="submit" 
+                        class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    + Lisää varastoon
+                </button>
+            </form>
+        </div>
+
+        <!-- Remove Products -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold mb-4 text-red-600">Poista tuotteita</h2>
+            <form method="POST" action="{{ url_for('remove_products', varasto_id=varasto_id) }}">
+                <div class="mb-4">
+                    <label for="remove_maara" class="block text-gray-700 font-medium mb-2">
+                        Määrä
+                    </label>
+                    <input type="number" id="remove_maara" name="maara" required min="0.1" step="0.1"
+                           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                           placeholder="Poistettava määrä">
+                </div>
+                <button type="submit" 
+                        class="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    - Ota varastosta
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <a href="{{ url_for('index') }}" class="text-blue-600 hover:underline">
+            ← Takaisin varastolistaan
+        </a>
+    </div>
+</div>
+{% endblock %}
