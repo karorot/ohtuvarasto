@@ -8,3 +8,4 @@ Ohjelmistotuotanto (syksy 2025), Helsingin yliopisto
 ## Sisältö:
 * Viikko 1: Tehtävät 2-13
 * Viikko 2: Tehtävät 6-8 (viimeinen osittain)
+* Viikko 5: Tehtävä 6, Copilotin toteuttama web UI
